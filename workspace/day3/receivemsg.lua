@@ -1,22 +1,36 @@
 local skynet = require 'skynet'
 require 'skynet.manager'
 
+local db = {}
+local command = {}
+local queue = require 'skynet.queue'
+local cs = queue()
+
+function command.setDB(key, value)
+    -- skynet.error('setDB key = ', key, ' value = ', value)
+    db[key] = value
+end
+
+function command.getDB(key)
+    skynet.sleep(600)
+    return db[key]
+end
+
 skynet.start(function()
     skynet.register('.receivemsg')
 
-    skynet.dispatch('lua', function(session, address, ...)
-        skynet.error('session = ', session)
-        skynet.error('address = ', skynet.address(address))
+    skynet.dispatch('lua', function(session, address, cmd, ...)
+        --skynet.error('session = ', session)
+        --skynet.error('address = ', skynet.address(address))
 
-        local args = {...}
+        local f = command[cmd]
+        skynet.error('f = ', f)
+        if (f) then
+            local result = cs(f, ...)
 
-        for _, v in pairs(args) do
-            skynet.error('v = ', v)
+            skynet.retpack(result)
+        else
+            skynet.error('function not found')
         end
-
-        --skynet.retpack(...)
-
-        local msg, sz = skynet.pack(...)
-        skynet.ret(msg, sz)
     end)
 end)
