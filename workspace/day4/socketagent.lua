@@ -24,7 +24,5 @@ local function echo()
 end
 
 skynet.start(function()
-    
-
     skynet.fork(echo)
 end)
