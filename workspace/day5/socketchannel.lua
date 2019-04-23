@@ -18,11 +18,17 @@ local function task()
     local i = 0
 
     while i < 3 do
-        local resp = channel:request('data'..i..'\n', response)
-        skynet.error('resp = ', resp)
+
+        --skynet.fork(function()
+            local resp = channel:request('data'..i..'\n', response)
+            skynet.error('resp = ', resp)
+        --end)
+        
 
         i = i + 1
     end
+
+    channel:close()
 end
 
 skynet.start(function()

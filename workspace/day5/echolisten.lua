@@ -6,12 +6,15 @@ local function echo(ID)
     socket.start(ID)
 
     while (true) do
-        local str, endstr = socket.read(ID)
+        local str, endstr = socket.readline(ID, '\n')
 
         if (str) then
             skynet.error('receive form ID', ID, 'content = ', str)
-            socket.lwrite(ID, 'low'..str:upper())
-            socket.write(ID, str:upper())
+            skynet.fork(function()
+                socket.write(ID, str:upper()..'\n')
+                skynet.sleep(100)
+            end)
+            
         else
             skynet.error('the othe side closed', endstr)
             socket.close(ID)
