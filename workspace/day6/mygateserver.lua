@@ -1,6 +1,7 @@
 local skynet = require 'skynet'
 
 local gateserver = require 'snax.gateserver'
+local netpack = require 'skynet.netpack'
 
 local handler = {}
 
@@ -10,7 +11,7 @@ function handler.connect(fd, ipaddr)
 end
 
 function handler.message(fd, msg, sz)
-    skynet.error('fd = ', fd, ' msg = ', msg, ' sz = ', sz)
+    skynet.error('fd = ', fd, ' msg = ', netpack.tostring(msg, sz), ' sz = ', sz)
 end
 
 function handler.disconnect(fd)

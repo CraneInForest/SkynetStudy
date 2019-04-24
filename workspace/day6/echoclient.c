@@ -14,6 +14,7 @@ void* readthread(void* arg)
     int sockfd = (int)arg;
     int n = 0;
     char buf[MAXLINE];
+    
     while (1) 
     {
         n = read(sockfd, buf, MAXLINE);
@@ -38,10 +39,11 @@ int main(int argc, char *argv[])
     }
 
     int port = atoi(argv[1]);
-    
+    short plen;
     struct sockaddr_in servaddr;
     int sockfd;
     char buf[MAXLINE];
+    char package[MAXLINE];
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
@@ -50,8 +52,17 @@ int main(int argc, char *argv[])
     connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
     pthread_t thid;
     pthread_create(&thid, NULL, readthread, (void*)sockfd);
+
+    int plen_tmp;
     while (fgets(buf, MAXLINE, stdin) != NULL)
-        write(sockfd, buf, strlen(buf));
+    {
+        plen = strlen(buf) - 1;
+        plen_tmp = htons(plen);
+        memcpy(package, &plen_tmp, sizeof(plen));
+        memcpy(package + sizeof(short), buf, plen);
+        write(sockfd, package, plen + sizeof(short));
+    }
+        
     close(sockfd);
     return 0; 
 } 
