@@ -39,9 +39,18 @@ function handler.warning(fd, size)
     gateserver.closeclient(fd)
 end
 
+local CMD = {}
+
+function CMD.kick(...)
+    skynet.error('call kick function', ...)
+    local fd = ...
+    gateserver.closeclient(fd)
+end
+
 --提供command回调函数,当其它服务发送非open以及close消息的时候,该回调会被调用
-function handler.command(CMD, source, ...)
-    skynet.error('lua command', CMD, skynet.address(source), ...)
+function handler.command(cmd, source, ...)
+    skynet.error('lua command', cmd, skynet.address(source), ...)
+    CMD[cmd](...)
 end
 
 gateserver.start(handler)

@@ -8,11 +8,4 @@ skynet.start(function()
         maxclient = 64,
         nodelay = true
     })
-
-    skynet.call(gateserver, 'lua', 'kick')
-
-    skynet.sleep(1000)
-
-    skynet.error('gate server setup on', 8002)
-    skynet.exit()
 end)
