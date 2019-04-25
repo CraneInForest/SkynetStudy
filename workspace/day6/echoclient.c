@@ -32,18 +32,17 @@ void* readthread(void* arg)
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
+    if(argc != 2)
     {
-        fprintf(stderr, "use:%s [port]", argv[0]);
+        printf("usage:%s port", argv[0]);
         return -1;
-    }
-
+    } 
     int port = atoi(argv[1]);
-    short plen;
     struct sockaddr_in servaddr;
     int sockfd;
+    short size, nsize;
     char buf[MAXLINE];
-    char package[MAXLINE];
+    unsigned char sendbuf[MAXLINE];
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
@@ -52,17 +51,16 @@ int main(int argc, char *argv[])
     connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
     pthread_t thid;
     pthread_create(&thid, NULL, readthread, (void*)sockfd);
-
-    int plen_tmp;
     while (fgets(buf, MAXLINE, stdin) != NULL)
     {
-        plen = strlen(buf) - 1;
-        plen_tmp = htons(plen);
-        memcpy(package, &plen_tmp, sizeof(plen));
-        memcpy(package + sizeof(short), buf, plen);
-        write(sockfd, package, plen + sizeof(short));
-    }
-        
+        size = (short)strlen(buf); //计算需要发送的数据包长度
+        nsize = htons(size); //转换成大端序
+        memcpy(sendbuf, &nsize, sizeof(nsize)); //nsize先填入sendbuf
+        memcpy(sendbuf+sizeof(nsize), buf, size); //再填入buf内容
+        write(sockfd, sendbuf, size + sizeof(nsize));
+    } 
+    
     close(sockfd);
-    return 0; 
+
+    return 0;
 } 
